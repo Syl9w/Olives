@@ -1,19 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using Microsoft.OpenApi.Models;
 using Olives.Data;
 using Olives.Helpers;
+using Olives.Services;
 
 namespace Olives
 {
@@ -31,15 +36,27 @@ namespace Olives
         {
             services.AddCors();
             
+            services.Configure<FormOptions>( o => 
+            {
+                o.ValueCountLimit = int.MaxValue;
+                o.MultipartBodyLengthLimit = int.MaxValue;
+                o.MemoryBufferThreshold = int.MaxValue;
+            });
+
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IImageService, ImageService>();
             services.AddScoped<JwtService>();
             services.AddDbContext<UserContext>(options => 
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Olives", Version = "v1" });
             });
+            services.AddControllersWithViews();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,6 +79,9 @@ namespace Olives
                 .AllowAnyMethod()
                 .AllowCredentials()
             );
+
+            app.UseStaticFiles();
+            
 
             app.UseAuthorization();
 

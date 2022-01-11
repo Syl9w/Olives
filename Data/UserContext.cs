@@ -22,5 +22,6 @@ namespace Olives.Data
                 entity.HasIndex(e => e.Email).IsUnique();
             });
         }
+        public DbSet<Image> Images { get; set; }
     }
 }
