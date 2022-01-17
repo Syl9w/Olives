@@ -8,7 +8,7 @@ using Olives.Data;
 using Olives.Dtos;
 using Olives.Helpers;
 using Olives.Models;
-
+using Olives.Services;
 
 namespace Olives.Controllers
 {
@@ -18,15 +18,14 @@ namespace Olives.Controllers
     {
         private readonly IUserRepository _repository;
         private readonly JwtService _jwtService;
-        public AuthController(IUserRepository repository, JwtService jwtService)
+        private readonly IImageService _imageService;
+        public AuthController(IUserRepository repository, JwtService jwtService, IImageService imageService)
         {
             _jwtService = jwtService;
             _repository = repository;
+            _imageService = imageService;
         }
-        [HttpPost("hello")]
-        public IActionResult Hello(){
-            return Ok("Method works");
-        }
+        
         [HttpPost("register")]
         public IActionResult Register(RegisterDto registerDto)
         {
@@ -58,11 +57,11 @@ namespace Olives.Controllers
 
             Response.Cookies.Append("jwt", jwt, new CookieOptions{HttpOnly = true});
             
-            return Ok(new {message="success"});
+            return Ok(new {message="success", JWT=jwt});
         }
 
         [HttpGet("user")]
-        public IActionResult User()
+        public IActionResult GetUser()
         {
             try
             {
@@ -86,6 +85,48 @@ namespace Olives.Controllers
             Response.Cookies.Delete("jwt");
 
             return Ok(new {message="success"});
+        }
+
+        [HttpPost("Upload")]
+        public IActionResult Upload([FromForm]AddImageDto file)
+        {
+            var user = new User();
+            try
+            {
+                var jwt = Request.Cookies["jwt"];
+                var token = _jwtService.Verify(jwt);
+                int userID = int.Parse(token.Issuer);
+
+                user = _repository.GetById(userID);
+            }
+            catch(Exception _)
+            {
+                return Unauthorized();
+            }
+            _imageService.Upload(file, user);
+            return Ok();
+        }
+
+        [HttpGet("getImage")]
+        public IActionResult GetImage()
+        {
+            var user = new User();
+            try
+            {
+                var jwt = Request.Cookies["jwt"];
+                var token = _jwtService.Verify(jwt);
+                int userID = int.Parse(token.Issuer);
+
+                user = _repository.GetById(userID);
+            }
+            catch(Exception _)
+            {
+                return Unauthorized();
+            }
+            var img = _imageService.GetImage(user.Id);
+
+            return File(img.ImageData, "image/jpeg");
+
         }
     }
 }

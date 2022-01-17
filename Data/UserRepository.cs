@@ -29,6 +29,7 @@ namespace Olives.Data
 
         public User GetById(int id)
         {
+
             return _context.Users.FirstOrDefault(u => u.Id == id);
         }
     }

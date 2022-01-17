@@ -32,7 +32,13 @@ namespace Olives.Migrations
                     b.Property<string>("ImageTitle")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Images");
                 });
@@ -60,6 +66,22 @@ namespace Olives.Migrations
                         .HasFilter("[Email] IS NOT NULL");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Olives.Models.Image", b =>
+                {
+                    b.HasOne("Olives.Models.User", "User")
+                        .WithOne("Image")
+                        .HasForeignKey("Olives.Models.Image", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Olives.Models.User", b =>
+                {
+                    b.Navigation("Image");
                 });
 #pragma warning restore 612, 618
         }
