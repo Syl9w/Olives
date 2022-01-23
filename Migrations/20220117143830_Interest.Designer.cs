@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Olives.Data;
 
 namespace Olives.Migrations
 {
     [DbContext(typeof(UserContext))]
-    partial class UserContextModelSnapshot : ModelSnapshot
+    [Migration("20220117143830_Interest")]
+    partial class Interest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,43 +73,6 @@ namespace Olives.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Interets");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Movie"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Books"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Traveling"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Hiking"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Slam-poetry"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "Singing"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "Guitar"
-                        });
                 });
 
             modelBuilder.Entity("Olives.Models.User", b =>

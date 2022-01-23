@@ -11,6 +11,6 @@ namespace Olives.Dtos
     {
         public string ImageTitle { get; set; }
         public IFormFile ImageData { get; set; }
-       
+
     }
 }

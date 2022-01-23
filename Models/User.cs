@@ -11,6 +11,7 @@ namespace Olives.Models
         public string Name { get; set; }
         public string Email { get; set; }
         [JsonIgnore] public string Password { get; set; }
-        public Image Image { get; set; }   
+        [JsonIgnore] public Image Image { get; set; }
+        [JsonIgnore] public List<Interest> Interests { get; set; }
     }
 }

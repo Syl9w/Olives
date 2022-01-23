@@ -39,18 +39,18 @@ namespace Olives
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
-            
-            services.Configure<FormOptions>( o => 
-            {
-                o.ValueCountLimit = int.MaxValue;
-                o.MultipartBodyLengthLimit = int.MaxValue;
-                o.MemoryBufferThreshold = int.MaxValue;
-            });
+
+            services.Configure<FormOptions>(o =>
+           {
+               o.ValueCountLimit = int.MaxValue;
+               o.MultipartBodyLengthLimit = int.MaxValue;
+               o.MemoryBufferThreshold = int.MaxValue;
+           });
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<JwtService>();
-            services.AddDbContext<UserContext>(options => 
+            services.AddDbContext<UserContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddAutoMapper(typeof(Startup));
@@ -69,10 +69,12 @@ namespace Olives
                 });
 
             services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Olives", Version = "v1" });
-                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme{
+                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
                     Description = "Standard Auththorization header using Bearer scheme. Example \"bearer {token}\"",
                     In = ParameterLocation.Header,
                     Name = "Authorization",
@@ -81,7 +83,7 @@ namespace Olives
                 c.OperationFilter<SecurityRequirementsOperationFilter>();
             });
             services.AddControllersWithViews();
-            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -98,15 +100,15 @@ namespace Olives
 
             app.UseRouting();
 
-            app.UseCors( options => options
-                .WithOrigins(new []{"http://localhost:3000","http://localhost:8080", "http://localhost:4200"})// React, Vue, Angular
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials()
+            app.UseCors(options => options
+               .WithOrigins(new[] { "http://localhost:3000", "http://localhost:8080", "http://localhost:4200" })// React, Vue, Angular
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials()
             );
 
             app.UseStaticFiles();
-            
+
             app.UseAuthentication();
 
             app.UseAuthorization();

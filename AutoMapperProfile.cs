@@ -12,7 +12,8 @@ namespace Olives
     {
         public AutoMapperProfile()
         {
-            
+            CreateMap<Interest, GetInterestDto>();
+            CreateMap<User, GetFriendsDto>();
         }
     }
 }

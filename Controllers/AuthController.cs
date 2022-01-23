@@ -14,7 +14,7 @@ namespace Olives.Controllers
 {
     [Route("api")]
     [ApiController]
-    public class AuthController: Controller
+    public class AuthController : Controller
     {
         private readonly IUserRepository _repository;
         private readonly JwtService _jwtService;
@@ -25,7 +25,16 @@ namespace Olives.Controllers
             _repository = repository;
             _imageService = imageService;
         }
-        
+
+        private User Get()
+        {
+            var jwt = Request.Cookies["jwt"];
+            var token = _jwtService.Verify(jwt);
+            int userID = int.Parse(token.Issuer);
+
+            return _repository.GetById(userID);
+        }
+
         [HttpPost("register")]
         public IActionResult Register(RegisterDto registerDto)
         {
@@ -35,9 +44,9 @@ namespace Olives.Controllers
                 Email = registerDto.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(registerDto.Password)
             };
-            
 
-            return Created("Success",_repository.Create(user));
+
+            return Created("Success", _repository.Create(user));
         }
 
         [HttpPost("login")]
@@ -45,19 +54,19 @@ namespace Olives.Controllers
         {
             var user = _repository.GetByEmail(loginDto.Email);
 
-            if(user == null)
-                return BadRequest(new {message = "Invalid Credentials"}); 
-            
-            if(!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
+            if (user == null)
+                return BadRequest(new { message = "Invalid Credentials" });
+
+            if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
             {
-                return BadRequest(new {message = "Invalid Credentials"}); 
+                return BadRequest(new { message = "Invalid Credentials" });
             }
 
             var jwt = _jwtService.Generate(user.Id);
 
-            Response.Cookies.Append("jwt", jwt, new CookieOptions{HttpOnly = true});
-            
-            return Ok(new {message="success", JWT=jwt});
+            Response.Cookies.Append("jwt", jwt, new CookieOptions { HttpOnly = true });
+
+            return Ok(new { message = "success", JWT = jwt });
         }
 
         [HttpGet("user")]
@@ -65,15 +74,11 @@ namespace Olives.Controllers
         {
             try
             {
-                var jwt = Request.Cookies["jwt"];
-                var token = _jwtService.Verify(jwt);
-                int userID = int.Parse(token.Issuer);
+                var user = Get();
 
-                var user = _repository.GetById(userID);
-                
                 return Ok(user);
             }
-            catch(Exception _)
+            catch (Exception _)
             {
                 return Unauthorized();
             }
@@ -81,25 +86,22 @@ namespace Olives.Controllers
 
         [HttpPost("logout")]
         public IActionResult Logout()
-        {   
+        {
             Response.Cookies.Delete("jwt");
 
-            return Ok(new {message="success"});
+            return Ok(new { message = "success" });
         }
 
         [HttpPost("Upload")]
-        public IActionResult Upload([FromForm]AddImageDto file)
+        public IActionResult Upload([FromForm] AddImageDto file)
         {
             var user = new User();
             try
             {
-                var jwt = Request.Cookies["jwt"];
-                var token = _jwtService.Verify(jwt);
-                int userID = int.Parse(token.Issuer);
 
-                user = _repository.GetById(userID);
+                user = Get();
             }
-            catch(Exception _)
+            catch (Exception _)
             {
                 return Unauthorized();
             }
@@ -113,13 +115,9 @@ namespace Olives.Controllers
             var user = new User();
             try
             {
-                var jwt = Request.Cookies["jwt"];
-                var token = _jwtService.Verify(jwt);
-                int userID = int.Parse(token.Issuer);
-
-                user = _repository.GetById(userID);
+                user = Get();
             }
-            catch(Exception _)
+            catch (Exception _)
             {
                 return Unauthorized();
             }
@@ -127,6 +125,56 @@ namespace Olives.Controllers
 
             return File(img.ImageData, "image/jpeg");
 
+        }
+
+        [HttpPost("addInterest")]
+        public ActionResult<List<Interest>> AddInterest(string newInterest)
+        {
+            var user = new User();
+            try
+            {
+                user = Get();
+            }
+            catch (Exception _)
+            {
+                return Unauthorized();
+            }
+            var newUserInterest = new AddUserInterestDto{
+                UserId = user.Id,
+                InterestName = newInterest
+            };
+            var interests = _repository.AddUserInterest(newUserInterest);
+           
+            return Ok(interests);
+        }
+
+        [HttpGet("getInterests")]
+        public ActionResult<List<Interest>> GetInterests()
+        {
+            var user = new User();
+            try
+            {
+                user = Get();
+            }
+            catch (Exception _)
+            {
+                return Unauthorized();
+            }
+            return Ok(_repository.GetInterests(user));
+        }
+        [HttpGet("getSuitableFriends")]
+        public ActionResult<List<User>> GetSuitableFriends(){
+            var user = new User();
+            try
+            {
+                user = Get();
+            }
+            catch (Exception _)
+            {
+                return Unauthorized();
+            }
+            var pf = _repository.FindSuitableFriends(user);
+            return Ok(new{ pf});
         }
     }
 }

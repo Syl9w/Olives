@@ -23,32 +23,34 @@ namespace Olives.Services
 
         private int GetUserId() => int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-        public async Task Upload( AddImageDto file, User user)
+        public async Task Upload(AddImageDto file, User user)
         {
-            if(file.ImageData!=null){
-                
+            if (file.ImageData != null)
+            {
+
                 byte[] p1 = null;
-                using(var fs1= file.ImageData.OpenReadStream())
-                using(var ms1= new MemoryStream())
+                using (var fs1 = file.ImageData.OpenReadStream())
+                using (var ms1 = new MemoryStream())
                 {
                     fs1.CopyTo(ms1);
                     p1 = ms1.ToArray();
                 }
-                var image = new Image{
+                var image = new Image
+                {
                     ImageTitle = file.ImageTitle,
                     ImageData = p1,
-                    UserId = user.Id 
+                    UserId = user.Id
                 };
-                
+
                 _context.Images.Add(image);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public  Image GetImage(int userId)
+        public Image GetImage(int userId)
         {
-            var img =  _context.Images.FirstOrDefault(i => i.UserId == userId);
-            return img; 
+            var img = _context.Images.FirstOrDefault(i => i.UserId == userId);
+            return img;
         }
     }
 }
