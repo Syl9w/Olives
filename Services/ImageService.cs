@@ -32,7 +32,7 @@ namespace Olives.Services
                 using (var fs1 = file.ImageData.OpenReadStream())
                 using (var ms1 = new MemoryStream())
                 {
-                    fs1.CopyTo(ms1);
+                    await fs1.CopyToAsync(ms1);
                     p1 = ms1.ToArray();
                 }
                 var image = new Image
@@ -47,10 +47,19 @@ namespace Olives.Services
             }
         }
 
-        public Image GetImage(int userId)
+        public async Task<Image> GetImage(int userId)
         {
-            var img = _context.Images.FirstOrDefault(i => i.UserId == userId);
+            var img = await _context.Images.FirstOrDefaultAsync(i => i.UserId == userId);
             return img;
         }
+
+        public async Task DeleteImage(User user)
+        {
+            Image img = await _context.Images.FirstOrDefaultAsync(i => i.UserId == user.Id);
+            if (img != null){
+                _context.Images.Remove(img);
+                await _context.SaveChangesAsync();
+            }
+        }   
     }
 }

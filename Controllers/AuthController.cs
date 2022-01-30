@@ -123,12 +123,28 @@ namespace Olives.Controllers
             }
             var img = _imageService.GetImage(user.Id);
 
-            return File(img.ImageData, "image/jpeg");
+            return File(img.Result.ImageData, "image/jpeg");
 
         }
 
+        [HttpDelete("deleteImage")]
+        public IActionResult DeleteImage()
+        {
+            var user = new User();
+            try
+            {
+                user = Get();
+            }
+            catch (Exception _)
+            {
+                return Unauthorized();
+            }
+            _imageService.DeleteImage(user);
+            return Ok();
+        }
+
         [HttpPost("addInterest")]
-        public ActionResult<List<Interest>> AddInterest(string newInterest)
+        public ActionResult<List<Interest>> AddInterest(AddInterestDto newInterest)
         {
             var user = new User();
             try
@@ -141,7 +157,7 @@ namespace Olives.Controllers
             }
             var newUserInterest = new AddUserInterestDto{
                 UserId = user.Id,
-                InterestName = newInterest
+                InterestName = newInterest.Name
             };
             var interests = _repository.AddUserInterest(newUserInterest);
            

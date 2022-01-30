@@ -11,6 +11,7 @@ namespace Olives.Services
     public interface IImageService
     {
         Task Upload(AddImageDto file, User user);
-        Image GetImage(int userId);
+        Task<Image> GetImage(int userId);
+        Task DeleteImage(User user);
     }
 }
